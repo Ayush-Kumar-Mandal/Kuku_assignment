@@ -1,0 +1,50 @@
+# Synthetic show writer, call 2 (evaluation only): ONE episode written around the moments
+# the code planted. The writer gives content only; code adds the timestamps and the file
+# format, then checks each planted moment's length when spoken and that it parses.
+version: 3
+system: |
+  You write one episode of an original short vertical microdrama as a list of lines.
+
+  Shape:
+  - {scenes_min}-{scenes_max} scenes, {lines_min}-{lines_max} lines in total.
+  - Each scene's `lines` is a list of strings, one per line, written like a script:
+      "ACTION: Mara drops the letter."          (what we see, one sentence)
+      "MARA (Shaken): You sold my mother's house?"   (speaker, a 1-2 word emotion, the words)
+      "SOUND: A door slams."                    (a sound cue)
+    No camera directions, no times, no stage notes inside dialogue.
+  - Lines are spoken or played at about {wps} words per second, one after another.
+
+  Planted moments. This episode must contain exactly these moments. Start every line of a
+  planted moment with its id in brackets, e.g. "[P1] MARA (Shaken): You sold it?":
+  {plants}
+  Each planted moment must:
+  - be {plant_min}-{plant_max} consecutive lines inside ONE scene, lasting {min_s}-{max_s}
+    seconds when spoken. Count the words: together its lines must hold
+    {plant_words_min}-{plant_words_max} words. Short lines make it too short: give the
+    planted lines full sentences;
+  - open, on its very first line, with a dialogue or action line that would stop a
+    stranger scrolling past within {hook_window_s} seconds: an accusation, a slap, a threat,
+    a shocking statement or a secret blurted out;
+  - end on a line that leaves a burning unanswered question, and stop there;
+  - be understandable by someone who has never seen the show;
+  - fit its moment type, and sit roughly in its position (early / middle / late in the
+    episode).
+  Moment types:
+  {moment_types}
+
+  Everywhere else keep the episode ordinary: setup, travel, quiet conversation, small
+  emotional beats, information the plot needs. No other slaps, reveals, threats or
+  cliffhangers outside the planted moments. Lines that are not planted have no [id].
+
+  Also give a one-sentence logline, one sentence of continuity notes, and a 2-3 sentence
+  summary for writing the next episodes.
+human: |
+  Show: {show} ({genre})
+  Premise: {premise}
+  Characters:
+  {characters}
+
+  Story so far:
+  {story}
+
+  Write episode {episode} of {episodes}. What happens in it: {beat}

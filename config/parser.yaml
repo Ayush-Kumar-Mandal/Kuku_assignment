@@ -1,0 +1,67 @@
+# Screenplay format definition. A new screenplay format = edit this file, not the code.
+# Patterns are matched against each line after stripping surrounding whitespace.
+# `{ts}` inside a pattern is replaced with the timestamp pattern below (with its
+# named groups turned into plain groups), so the time format is defined once.
+
+file_glob: "*.txt"
+encoding: utf-8
+flags: [IGNORECASE]          # applied to every pattern (ep 6 writes scene metadata in caps)
+
+# Fallback when the header has no episode number.
+episode_number_from_filename: 'episode[-_ ]?(?P<num>\d+)'
+
+timestamp:
+  # Named groups: h (optional), m, s, f (optional fraction). "01:05.60" -> 65.6 s
+  pattern: '(?:(?P<h>\d{1,2}):)?(?P<m>\d{1,2}):(?P<s>\d{2})(?:[.,](?P<f>\d{1,3}))?'
+
+header:
+  episode_number: '^EPISODE NUMBER:\s*(?:Episode\s*)?(?P<num>\d+)'
+  logline: '^EPISODE LOGLINE:\s*(?P<text>.*)$'
+  continuity_notes: '^CONTINUITY NOTES:\s*(?P<text>.*)$'
+
+script_start: '^-{2,}\s*SCRIPT START\s*-{2,}$'
+script_end: '^-{2,}\s*SCRIPT END\s*-{2,}$'
+
+scene:
+  number: '^SCENE\s+(?P<num>\d+)\b'
+  heading: '^Scene heading:\s*(?P<text>.+)$'
+  start: '^Scene start:\s*(?P<ts>{ts})'
+  end: '^Scene end:\s*(?P<ts>{ts})'
+
+# Lines that carry no content and are skipped (still count as parsed).
+ignore:
+  - '^Actions and dialogue:?$'
+
+# A block opens with **LABEL:** (optionally with body text on the same line).
+# A blank line ends a block's body; text after it that matches nothing is reported as
+# unparsed instead of being silently glued onto the previous block.
+block_ends_on_blank_line: true
+
+block_header: '^\*\*(?P<label>[^*]+?):\*\*\s*(?P<body>.*)$'
+
+# Timing line right after a block header. End is optional: if missing, the parser uses
+# the next item's start in the same scene, or the scene end for the last item.
+timing_line: '^Start:\s*\(?(?P<start>{ts})\)?(?:\s*\|\s*End:\s*\(?(?P<end>{ts})\)?)?\s*$'
+
+# Block label -> item kind. Matched case-insensitively against the label with
+# parentheticals removed. Any label not listed here is treated as a speaking character.
+block_kinds:
+  CAMERA: camera
+  ACTION: action
+  SOUND FX: sound
+  SFX: sound
+  MUSIC: sound
+dialogue_kind: dialogue
+
+speaker:
+  name: '^(?P<name>[^(]+?)\s*(?:\(|$)'   # text before the first parenthesis
+  parenthetical: '\(([^)]*)\)'           # every (...) group after the name
+  emotion_separator: ','
+  # Parentheticals that describe delivery, not emotion.
+  voice_tags: ["O.S.", "V.O.", "O.C.", "CONT'D", "CONT.", "OFF", "PHONE", "FILTERED"]   # quoted: YAML reads bare OFF as false
+
+# Slack when checking items sit inside their scene, scenes don't overlap, etc.
+warning_tolerance_s: 0.05
+
+# Quote characters stripped from both ends of dialogue text.
+dialogue_quotes: "\"“”'‘’"

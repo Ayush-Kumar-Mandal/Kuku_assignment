@@ -1,0 +1,52 @@
+# Screenplays and results are confidential: serve the app on this machine only.
+# (Streamlit's default listens on every network interface.) To reach it from another
+# machine on purpose, start it with: streamlit run app/streamlit_app.py --server.address 0.0.0.0
+[server]
+address = "localhost"
+port = 8501
+maxUploadSize = 50          # MB; a 50-episode show is ~1-2 MB of text
+
+[browser]
+gatherUsageStats = false
+serverAddress = "localhost"
+
+# ---------------------------------------------------------------- look: indigo accent
+# One accent colour, soft surfaces, rounded corners; light and dark versions (the viewer
+# picks in the app menu, default follows the system). No external fonts or assets: the
+# app runs offline on this machine.
+[theme]
+baseRadius = "0.6rem"
+buttonRadius = "0.5rem"
+showSidebarBorder = true
+
+[theme.light]
+primaryColor = "#4F46E5"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F3F4FA"
+textColor = "#1E2132"
+linkColor = "#4338CA"
+borderColor = "#E2E4F0"
+dataframeHeaderBackgroundColor = "#EEF0FB"
+blueColor = "#4F46E5"
+violetColor = "#7C3AED"
+
+[theme.light.sidebar]
+backgroundColor = "#EEF0FB"
+secondaryBackgroundColor = "#FFFFFF"
+borderColor = "#DADDF0"
+
+[theme.dark]
+primaryColor = "#8B93F8"
+backgroundColor = "#0F1118"
+secondaryBackgroundColor = "#1A1D2A"
+textColor = "#E6E8F2"
+linkColor = "#A5ABFA"
+borderColor = "#2A2E40"
+dataframeHeaderBackgroundColor = "#1E2233"
+blueColor = "#8B93F8"
+violetColor = "#A78BFA"
+
+[theme.dark.sidebar]
+backgroundColor = "#151826"
+secondaryBackgroundColor = "#1E2233"
+borderColor = "#2A2E40"

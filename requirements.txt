@@ -1,0 +1,17 @@
+# Step 1: config + parser
+pydantic>=2.7
+pyyaml>=6.0
+pytest>=8.0
+# Step 2: LLM client (versions verified 2026-11)
+langchain>=1.4
+langchain-core>=1.7
+langchain-groq>=1.1
+langchain-google-genai>=4.4
+python-dotenv>=1.0
+# Step 3: graph
+langgraph>=1.2
+langgraph-checkpoint-sqlite>=3.1
+
+# Step 7: UI
+streamlit>=1.67
+pandas>=2.2

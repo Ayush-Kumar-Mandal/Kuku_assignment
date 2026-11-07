@@ -1,0 +1,59 @@
+# Synthetic show generator (evaluate.synthetic_show): a made-up show written in the exact
+# screenplay format, around moments WE plant, so the answer key is known by construction.
+# The writer LLM (models.synthetic_writer) only writes content; this file decides the
+# shape, timing and on-disk format. The output must parse with config/parser.yaml (the
+# generator checks it does, at 100% coverage, before saving anything).
+
+output_dir: input/synthetic        # <output_dir>/<show-slug>/episode-001.txt ... (gitignored)
+episodes: 8                        # default; --episodes overrides
+
+# Shape of each episode (the writer is told these; the checks enforce them)
+scenes_per_episode: [2, 3]         # [min, max]
+lines_per_episode: [20, 60]        # [min, max] action + dialogue + sound lines (2-3 min episodes)
+plants_per_episode: [1, 2]         # [min, max] planted moments
+plant_lines: [6, 14]               # guidance for the writer: lines per planted moment
+positions: [early, middle, late]   # where a plant may sit; each episode uses distinct ones
+story_summaries: 6                 # earlier episodes' summaries given to the writer
+
+# How the writer writes a line: "LABEL: text", planted lines prefixed "[P1] ". These labels
+# (any case) mean action / sound; any other label is a speaker, "NAME (Emotion): text".
+line_labels:
+  action: [ACTION]
+  sound: [SOUND, SOUND FX, SFX]
+
+# Timing: the writer never writes times. Each line lasts (words / words_per_second),
+# clamped to [min_line_s, max_line_s]; lines follow each other with gap_s between them,
+# scenes with scene_gap_s. A plant's length is checked against promo.min/max_duration_s.
+timing:
+  words_per_second: 2.6
+  min_line_s: 1.6
+  max_line_s: 9.0
+  gap_s: 0.3
+  scene_gap_s: 0.5
+
+# On-disk format. Timestamps use the parser's MM:SS.ff form. Placeholders:
+#   header: {number} {logline} {continuity}   scene: {num} {heading} {start} {end}
+#   block:  {label} {start} {end} {text}
+render:
+  file_name: "episode-{number:03d}.txt"
+  header: |-
+    EPISODE NUMBER: Episode {number}
+    EPISODE LOGLINE: {logline}
+    CONTINUITY NOTES: {continuity}
+  script_start: "--- SCRIPT START ---"
+  script_end: "--- SCRIPT END ---"
+  scene: |-
+    SCENE {num:02d}
+    Scene heading: {heading}
+    Scene start: {start}
+    Scene end: {end}
+
+    Actions and dialogue:
+  block: |-
+    **{label}:**
+    Start: ({start}) | End: ({end})
+    {text}
+  dialogue_text: '"{text}"'
+  speaker_with_emotion: "{name} ({emotion})"
+  speaker_plain: "{name}"
+  kind_labels: {action: ACTION, sound: SOUND FX}    # dialogue blocks are labelled with the speaker

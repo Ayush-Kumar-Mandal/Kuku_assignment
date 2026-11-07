@@ -1,0 +1,42 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	parse(parse)
+	memory_read(memory_read)
+	reader(reader)
+	cutter(cutter)
+	joiner(joiner)
+	evaluator(evaluator)
+	rank(rank)
+	editor_review(editor_review)
+	feedback(feedback)
+	memory_write(memory_write)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> parse;
+	cutter -.-> evaluator;
+	cutter -.-> joiner;
+	editor_review -.-> feedback;
+	editor_review -.-> memory_write;
+	evaluator -.-> cutter;
+	evaluator -.-> joiner;
+	evaluator -.-> rank;
+	feedback -.-> cutter;
+	feedback -.-> joiner;
+	feedback -.-> rank;
+	joiner --> evaluator;
+	memory_read --> reader;
+	parse --> memory_read;
+	rank -.-> editor_review;
+	rank -.-> memory_write;
+	reader -.-> cutter;
+	memory_write --> __end__;
+	cutter -.-> cutter;
+	evaluator -.-> evaluator;
+	reader -.-> reader;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

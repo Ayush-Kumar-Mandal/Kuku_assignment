@@ -1,0 +1,14 @@
+# Moment taxonomy used by Reader / Cutter / Joiner / Evaluator prompts and stored on
+# every moment, promo, feedback row and example. Add or rename types here only.
+moment_types:
+  confrontation: "Characters clash openly: accusations, threats, a face-off or a physical blow."
+  reveal: "A hidden truth, identity, status or secret comes out."
+  humiliation: "A character is publicly shamed, mocked, rejected or degraded."
+  revenge: "A wronged character turns the tables or delivers payback."
+  romance: "Attraction, tenderness, a kiss, a confession or romantic tension."
+  betrayal: "Someone trusted breaks faith: abandonment, cheating, backstabbing."
+  danger: "Physical threat, violence, pursuit, injury or a life at risk."
+  other: "Strong moment that fits none of the above."
+
+# Used when a model returns a type not in the list above.
+default_type: other

@@ -1,0 +1,23 @@
+# Prompt fragments the LLM client adds to every agent's prompt. Not an agent itself.
+version: 1
+
+# Appended as an extra system message when a model has no native structured output.
+# {schema} is the agent's Pydantic model as JSON Schema.
+json_fallback: |
+  Respond with ONE JSON object and nothing else: no prose, no markdown fences.
+  It must validate against this JSON Schema:
+  {schema}
+
+# Sent as a new human message when the previous answer failed validation or a custom
+# check. {previous} is the rejected answer, {errors} the list of problems.
+retry: |
+  Your previous answer was rejected.
+
+  Previous answer:
+  {previous}
+
+  Problems to fix:
+  {errors}
+
+  Return the full corrected answer in the same format. Only use timestamps that appear
+  in the screenplay above. Fix every problem listed.

@@ -1,0 +1,210 @@
+# Central run settings. Everything tunable lives here; code reads it via config/loader.py.
+# Show name, genre and input paths are NOT here: they come from the CLI / UI.
+
+# --- Models per agent (LangChain init_chat_model) -----------------------------------
+# provider = init_chat_model's model_provider ("google_genai" | "groq").
+# Model IDs checked 2026-11 against provider docs AND the models this Groq key can access
+# (llama-3.x is not available to it; gemini-2.5-flash is deprecated).
+# structured_output: auto   = native if the LangChain model profile says it is supported,
+#                             otherwise JSON mode; native errors also drop to JSON mode
+#                    native / fallback = force one path
+# kwargs: passed straight to init_chat_model (e.g. reasoning_effort).
+# The evaluator is deliberately a different model family from the generators, so it
+# doesn't share their blind spots when judging their work.
+#
+# fallbacks: backup models tried in order when the main one's quota runs out (a daily
+# quota, or still rate-limited/overloaded after every backoff wait). The switch is logged
+# (calls.jsonl, usage.json, trace) and lasts for the rest of the run.
+# Free-tier quotas seen with this project's keys (2026-11): gemini-3.6-flash 20 requests/day;
+# Groq 1K requests and 200K tokens per day per model (Groq docs). A full 50-episode run needs
+# ~300 calls / ~1.2M tokens, so the load has to spread over several models.
+models:
+  default:
+    {provider: groq, model: openai/gpt-oss-20b, temperature: 0.3,
+     fallbacks: [{provider: groq, model: qwen/qwen3.8-27b, temperature: 0.3}]}
+  parser_fallback:
+    {provider: groq, model: qwen/qwen3.8-27b, temperature: 0.0,
+     fallbacks: [{provider: groq, model: openai/gpt-oss-20b, temperature: 0.0}]}
+  # gemini-3.6-flash / 3.5-flash-lite use fixed sampling and ignore temperature: none set.
+  reader:
+    {provider: google_genai, model: gemini-3.6-flash, kwargs: {reasoning_effort: low},
+     fallbacks: [{provider: google_genai, model: gemini-3.5-flash-lite}]}
+  cutter:
+    {provider: google_genai, model: gemini-3.5-flash-lite,
+     fallbacks: [{provider: groq, model: qwen/qwen3.8-27b, temperature: 0.3}]}
+  joiner:
+    {provider: google_genai, model: gemini-3.6-flash, kwargs: {reasoning_effort: low},
+     fallbacks: [{provider: google_genai, model: gemini-3.5-flash-lite}]}
+  # Evaluator backups: same family first (gpt-oss) so scores stay comparable, then qwen.
+  evaluator:
+    {provider: groq, model: openai/gpt-oss-120b, temperature: 0.0,
+     fallbacks: [{provider: groq, model: openai/gpt-oss-20b, temperature: 0.0},
+                 # 3rd: separate Groq quota, and still a different family from the Gemini generators
+                 {provider: groq, model: qwen/qwen3.8-27b, temperature: 0.0}]}
+  feedback:
+    {provider: google_genai, model: gemini-3.5-flash-lite,
+     fallbacks: [{provider: groq, model: openai/gpt-oss-20b, temperature: 0.2}]}
+  # Evaluation only (evaluate.ai_labels): an independent answer key. Gemma is the one free
+  # family none of the tool's agents use, so it doesn't share their blind spots
+  # (evaluate.compare warns if a run used a labeller model anyway).
+  labeler:
+    {provider: google_genai, model: gemma-4-31b-it, temperature: 0.2,
+     fallbacks: [{provider: google_genai, model: gemma-4-26b-a4b-it, temperature: 0.2}]}
+  # Evaluation only (evaluate.synthetic_show): writes made-up episodes around planted moments.
+  # Not the labeller's model, so the labeller isn't checked on its own writing.
+  # Backup: gemini-3.5-flash-lite (reliable JSON, roomy free limits). Tried and dropped
+  # (2026-11-07): gpt-oss-20b (Groq returns json_validate_failed with an empty answer for a
+  # whole episode, in schema and JSON mode) and qwen (free tier ~1K output tokens/minute,
+  # less than one episode). flash-lite is also the Cutter's model: the answer key records
+  # its writers, and evaluate.compare warns when a run shares one.
+  synthetic_writer:
+    {provider: groq, model: openai/gpt-oss-120b, temperature: 0.8,
+     fallbacks: [{provider: google_genai, model: gemini-3.5-flash-lite}]}
+
+# Per-provider details the client needs. Adding a provider = adding an entry here
+# (and installing its langchain-<provider> package).
+providers:
+  groq:
+    api_key_env: GROQ_API_KEY
+    native_method: json_schema                         # with_structured_output(method=...)
+    json_mode_kwargs: {response_format: {type: json_object}}
+  google_genai:
+    api_key_env: GOOGLE_API_KEY
+    native_method: json_schema
+    json_mode_kwargs: {response_mime_type: application/json}
+
+# --- LLM call behaviour --------------------------------------------------------------
+llm:
+  max_retries: 3              # validation / custom-check retries per call
+  request_timeout_s: 120
+  provider_max_retries: 1     # SDK-level retries for network errors (rate limits handled below)
+  rate_limit_backoff_s: [10, 30, 60]   # waits between rate-limit retries (free tiers)
+  max_rate_limit_waits: 30     # per-minute limits that say "try again in Xs" are waited out up to this many times
+
+# --- Promo rules -----------------------------------------------------------------------
+promo:
+  min_duration_s: 20
+  max_duration_s: 60
+  hook_window_s: 3            # the hook must land in the first N seconds
+  max_segments: 4             # joiner: max pieces in one multi-segment promo
+  boundary_tolerance_s: 0.05  # how close a start/end must be to a parsed line boundary
+  cliffhanger_window_s: 10   # the cliffhanger line must start at most this long before the promo ends
+
+# --- Evaluator loop -------------------------------------------------------------------
+# What each agent is asked for and shown. Prompt text itself lives in prompts/*.yaml.
+agents:
+  screenplay_kinds: [dialogue, action, sound]   # item kinds shown to agents (camera lines run in parallel; left out)
+  reader:
+    max_hooks: 3              # per episode
+    max_cliffhangers: 3       # per episode
+    summary_max_words: 250    # running story summary carried from episode to episode
+  cutter:
+    max_promos_per_episode: 2
+  joiner:
+    max_promos: 6             # multi-segment promos built once all episodes are cut (0 = none)
+    max_moments: 30           # strongest Reader moments shown to the Joiner, with excerpts
+    min_moment_strength: 6
+    context_before_s: 6       # excerpt shown around each moment
+    context_after_s: 20
+  revise:
+    context_s: 25             # extra screenplay shown either side of the current cut
+
+evaluator:
+  max_revision_rounds: 2      # after this, keep best-scoring version and move on
+  pass_threshold: 7.0         # final score needed to pass
+  min_each_score: 6           # every individual score must reach this too
+  batch_size: 5               # promos scored per graph step; each batch is checkpointed, so a
+                              # crash or kill mid-evaluation loses at most one batch
+
+# --- Scoring & ranking -----------------------------------------------------------------
+scoring:
+  weights: {hook: 0.4, cliffhanger: 0.35, standalone: 0.25}
+
+ranking:
+  top_n: 20
+  max_per_episode: 2
+  overlap_threshold: 0.5      # near-duplicate: shares >= 50% of the SHORTER promo's screen time
+  early_episode_preference: 0.15   # rank_score = final x (1 + 0.15 x earliness); ep 1 = 1.0, last ep = 0; 0 = off
+  min_final_score: 6.0        # promos scoring lower never make the list (even as 'kept best')
+
+# --- Feedback (Phase 2) ----------------------------------------------------------------
+feedback:
+  max_fix_attempts: 2       # editor "Fix" rounds per promo
+  backfill_rejected: true   # a rejected promo's slot goes to the next-best one, shown next round
+  max_review_rounds: 5      # review pauses at most; anything still undecided is flagged "unreviewed"
+
+# --- Long-term memory (Phase 3) --------------------------------------------------------
+memory:
+  db_path: memory/memory.db
+  top_rules: 8
+  approved_examples: 3
+  rejected_examples: 2
+  min_feedback_for_rule: 2
+  auto_activate_rules: false   # AI-proposed rules start as needs_review: the editor activates them (Memory tab)
+  write_when_off: true         # memory off = nothing injected into prompts; editor feedback is still recorded
+  learn_window: 200            # earlier feedback not yet behind any rule, shown to the learner (rules can span runs)
+
+# --- Evaluation (Step 8) ---------------------------------------------------------------
+# Labels, judgements and reports describe the confidential screenplays: kept under output/
+# (gitignored).
+evaluation:
+  dir: output/eval
+  match_min_overlap: 0.5     # a tool clip "finds" a label if they share >= 50% of the shorter one
+  failure_categories:        # why a pick would not be posted (spec section 10); keys are stored
+    needs_context: "Needs earlier context"
+    visual_hook: "Hook only works visually"
+    cuts_mid_action: "Cuts mid-action"
+    timestamps_off: "Timestamps off"
+    resolves_too_much: "Resolves too much"
+    other: "Other"
+  ai_labeler:                # evaluate.ai_labels (model: models.labeler)
+    max_per_episode: 4       # promo-worthy stretches listed per episode at most
+    story_loglines: 12       # earlier episodes' loglines given as "story so far" (most recent N)
+  agreement:                 # evaluate.agreement: AI labels checked against yours (or a planted key)
+    trust_min_recall: 0.7    # the AI found at least 70% of the reference moments...
+    trust_min_precision: 0.5 # ...and at least half of what it marked is also in the reference
+    min_reference_moments: 10   # fewer reference moments than this = too few to judge either way
+
+# --- Cost & scale (Step 8) ---------------------------------------------------------------
+# Prices: USD per 1M tokens, paid "Standard" tier, from aistudio.google.com/docs/pricing and
+# console.groq.com/docs/models. Free limits: Groq docs (per model); Gemini's are no longer
+# published, so the values are what this project's key reported (429 quotaValue) or none.
+cost:
+  prices_checked: "2026-11-06"
+  shows_per_week: 5          # "several new shows a week"
+  episodes_per_show: null    # null = same episode count as the measured run
+  paid_prices_per_m:
+    "google_genai:gemini-3.6-flash":      {input: 0.75,  output: 3.75}   # $1.50 / $7.50 from 2027-01-01
+    "google_genai:gemini-3.5-flash-lite": {input: 0.30,  output: 2.50}
+    "groq:openai/gpt-oss-120b":           {input: 0.15,  output: 0.60}
+    "groq:openai/gpt-oss-20b":            {input: 0.075, output: 0.30}
+    "groq:qwen/qwen3.8-27b":              {input: 0.80,  output: 4.00}   # preview model
+  free_limits:
+    "google_genai:gemini-3.6-flash":      {rpd: 20, source: "429 quotaValue seen 2026-11-06"}
+    "google_genai:gemini-3.5-flash-lite": {source: "unknown; 400+ requests in one day did not hit it"}
+    "groq:openai/gpt-oss-120b":           {rpd: 1000, tpd: 200000, source: "Groq docs + hit 2026-11-06"}
+    "groq:openai/gpt-oss-20b":            {rpd: 1000, tpd: 200000, source: "Groq docs + hit 2026-11-06"}
+    "groq:qwen/qwen3.8-27b":              {rpd: 1000, tpd: 200000, source: "Groq docs"}
+
+# --- Switches --------------------------------------------------------------------------
+switches:
+  memory: true
+  joiner: true
+  editor_review: true
+
+# --- Graph run ------------------------------------------------------------------------
+graph:
+  # Every episode is one reader step and one cutter step, so 50 episodes alone need 100+.
+  recursion_limit: 1000
+  durability: sync            # checkpoint written before the next step starts (crash-safe)
+
+# --- Paths -----------------------------------------------------------------------------
+paths:
+  output_dir: output
+  logs_dir: logs
+  checkpoint_db: checkpoints/graph.sqlite
+  parser_config: config/parser.yaml
+  moment_types: config/moment_types.yaml
+  prompts_dir: prompts
+  uploads_dir: input/uploads   # screenplays uploaded in the UI (under input/: gitignored)
+  synthetic_config: config/synthetic.yaml   # evaluate.synthetic_show: shape, timing and format of made-up shows

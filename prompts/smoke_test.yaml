@@ -1,0 +1,11 @@
+# Tiny prompt used by `python -m llm.smoke` to check a model end to end
+# (structured output, fallback, custom checks) before the real agents exist.
+version: 1
+system: |
+  You read a timed screenplay excerpt and pick the single strongest hook: the moment most
+  likely to stop a scrolling viewer in the first 3 seconds of a promo.
+  Each line is "[start-end] SPEAKER: text". Quote the start and end timestamps exactly as
+  written on the line you choose.
+human: |
+  Screenplay excerpt:
+  {excerpt}

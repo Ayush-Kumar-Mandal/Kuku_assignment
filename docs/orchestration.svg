@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 350" width="1000" height="350" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4b5563"/>
+    </marker>
+    <style>
+      .ai   { fill:#e0e3ff; stroke:#4f46e5; stroke-width:1.5 }
+      .code { fill:#f3f4f6; stroke:#6b7280; stroke-width:1.5 }
+      .ed   { fill:#fde68a; stroke:#d97706; stroke-width:1.5 }
+      .data { fill:#dcfce7; stroke:#16a34a; stroke-width:1.5 }
+      .t    { font-size:14px; fill:#1e2132; text-anchor:middle; dominant-baseline:middle }
+      .b    { font-weight:600 }
+      .l    { font-size:12px; fill:#4b5563; text-anchor:middle; dominant-baseline:middle }
+      .e    { fill:none; stroke:#4b5563; stroke-width:1.5 }
+      .d    { fill:none; stroke:#4b5563; stroke-width:1.5; stroke-dasharray:5 4 }
+      .bg   { fill:#ffffff }
+    </style>
+  </defs>
+  <rect width="1000" height="350" fill="#ffffff"/>
+
+  <!-- Row 1: find and make promos (left to right) -->
+  <rect class="data" x="10"  y="50" width="130" height="52" rx="8"/><text class="t" x="75"  y="68">Screenplays</text><text class="t" x="75" y="86">+ YAML config</text>
+  <rect class="code" x="165" y="50" width="90"  height="52" rx="8"/><text class="t" x="210" y="76">Parse</text>
+  <rect class="code" x="280" y="50" width="120" height="52" rx="8"/><text class="t" x="340" y="76">Load memory</text>
+  <rect class="ai"   x="430" y="50" width="105" height="52" rx="8"/><text class="t b" x="482" y="76">Reader</text>
+  <rect class="ai"   x="565" y="50" width="105" height="52" rx="8"/><text class="t b" x="617" y="76">Cutter</text>
+  <rect class="ai"   x="700" y="50" width="105" height="52" rx="8"/><text class="t b" x="752" y="76">Joiner</text>
+  <rect class="ai"   x="835" y="50" width="150" height="52" rx="8"/><text class="t b" x="910" y="76">Evaluator</text>
+  <path class="e" d="M140 76 H163" marker-end="url(#a)"/>
+  <path class="e" d="M255 76 H278" marker-end="url(#a)"/>
+  <path class="e" d="M400 76 H428" marker-end="url(#a)"/>
+  <path class="e" d="M535 76 H563" marker-end="url(#a)"/>
+  <path class="e" d="M670 76 H698" marker-end="url(#a)"/>
+  <path class="e" d="M805 76 H833" marker-end="url(#a)"/>
+  <!-- revision loop -->
+  <path class="e" d="M900 50 C900 10, 617 10, 617 48" marker-end="url(#a)"/>
+  <rect class="bg" x="700" y="13" width="110" height="18"/><text class="l" x="755" y="22">weak: redo, max 2</text>
+
+  <!-- Evaluator to ranking -->
+  <path class="e" d="M910 102 V208" marker-end="url(#a)"/>
+
+  <!-- Row 2: decide and remember (right to left) -->
+  <rect class="code" x="835" y="210" width="150" height="52" rx="8"/><text class="t" x="910" y="228">Rank top 20</text><text class="l" x="910" y="246">code, not AI</text>
+  <rect class="ed"   x="610" y="210" width="160" height="52" rx="8"/><text class="t b" x="690" y="228">Editor review</text><text class="l" x="690" y="246">run pauses</text>
+  <rect class="ai"   x="430" y="210" width="140" height="52" rx="8"/><text class="t b" x="500" y="236">Memory learner</text>
+  <rect class="data" x="245" y="210" width="150" height="52" rx="8"/><text class="t" x="320" y="228">Ranked promos,</text><text class="t" x="320" y="246">report, traces</text>
+  <rect class="code" x="30"  y="210" width="180" height="52" rx="8"/><text class="t" x="120" y="228">Quality checks</text><text class="l" x="120" y="246">labels, judge, cost</text>
+  <path class="e" d="M835 226 H772" marker-end="url(#a)"/>
+  <path class="e" d="M770 248 H833" marker-end="url(#a)"/>
+  <text class="l" x="802" y="282">reject: back-fill</text>
+  <path class="e" d="M610 236 H572" marker-end="url(#a)"/>
+  <text class="l" x="590" y="199">all decided</text>
+  <path class="e" d="M430 236 H397" marker-end="url(#a)"/>
+  <path class="e" d="M245 236 H212" marker-end="url(#a)"/>
+
+  <!-- editor fix loop -->
+  <rect class="ai" x="610" y="128" width="160" height="44" rx="8"/><text class="t b" x="690" y="150">Feedback agent</text>
+  <path class="e" d="M690 210 V174" marker-end="url(#a)"/>
+  <text class="l" x="740" y="192">fix + comment</text>
+  <path class="e" d="M610 150 H600 V104" marker-end="url(#a)"/>
+  <text class="l" x="575" y="140">re-cut</text>
+
+  <!-- memory loop -->
+  <path class="e" d="M500 262 V284" marker-end="url(#a)"/>
+  <path class="data" d="M450 292 a50 8 0 0 1 100 0 v30 a50 8 0 0 1 -100 0 z"/>
+  <path fill="none" stroke="#16a34a" stroke-width="1.5" d="M450 292 a50 8 0 0 0 100 0"/>
+  <text class="t" x="500" y="312">Memory DB</text>
+  <path class="d" d="M450 312 H15 V125 H340 V104" marker-end="url(#a)"/>
+  <rect class="bg" x="85" y="116" width="200" height="18"/><text class="l" x="185" y="125">next run: rules the editor switched on</text>
+
+  <!-- legend -->
+  <g font-size="12" fill="#4b5563" dominant-baseline="middle">
+    <rect class="ai"   x="640" y="312" width="14" height="14" rx="3"/><text x="660" y="320">AI agent</text>
+    <rect class="code" x="725" y="312" width="14" height="14" rx="3"/><text x="745" y="320">code</text>
+    <rect class="ed"   x="790" y="312" width="14" height="14" rx="3"/><text x="810" y="320">editor</text>
+    <rect class="data" x="860" y="312" width="14" height="14" rx="3"/><text x="880" y="320">data in / out</text>
+  </g>
+</svg>

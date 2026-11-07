@@ -1,0 +1,57 @@
+EPISODE NUMBER: Episode 7
+EPISODE LOGLINE: A baker discovers the rival shop owner is her long-lost brother,
+just as the town fair begins.
+CONTINUITY NOTES: Synthetic test fixture. Not from any real show.
+
+--- SCRIPT START ---
+
+SCENE 01
+Scene heading: INT. BAKERY – MORNING
+Scene start: 00:00.00
+Scene end: 00:20.00
+
+Actions and dialogue:
+
+**CAMERA:**
+Start: (00:00.00) | End: (00:03.50)
+Wide shot of a flour-dusted counter.
+
+**ACTION:**
+Start: (00:01.00) | End: (00:03.50)
+Mara slams a rolling pin onto the counter.
+Flour bursts into the air.
+
+**MARA (O.S.) (Furious, Shaking):**
+Start: (00:03.60) | End: (00:05.21)
+"You stole my recipe!"
+
+**TOMAS (Calm):**
+Start: (00:05.40)
+"I stole nothing, sister."
+
+**SOUND FX:**
+Start: (00:08.00) | End: (00:09.50)
+A bell rings over the door.
+
+this line matches nothing at all
+
+SCENE 02
+SCENE HEADING: EXT. TOWN SQUARE – DAY
+SCENE START: 00:20.00
+SCENE END: 01:05.60
+
+ACTIONS AND DIALOGUE:
+
+**ACTION:**
+Start: (00:20.00) | End: (00:24.00)
+Crowds gather around the fair stalls.
+
+**MARA (Whispering):**
+Start: (00:24.00) | End: (00:26.00)
+"Sister?"
+
+**CAMERA:**
+Start: (00:26.00)
+Close-up on Tomas, who smiles and turns away.
+
+--- SCRIPT END ---

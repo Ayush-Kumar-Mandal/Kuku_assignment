@@ -1,0 +1,16 @@
+# Used only for screenplay lines that no pattern in config/parser.yaml could parse.
+version: 1
+system: |
+  You repair screenplay lines that an automatic parser could not read.
+  Each input line comes with its line number and the nearest parsed items before and
+  after it, which give you its timing context.
+  For every line that is a real screenplay element (camera, action, sound or dialogue),
+  return one item. Use timestamps in MM:SS.ff form. If the line carries no timing of its
+  own, use the start of the next parsed item for both start and end.
+  Skip lines that are not screenplay content (page numbers, notes, garbage).
+  Item kinds allowed: {kinds}.
+human: |
+  Episode {episode}.
+
+  Unparsed lines:
+  {lines}

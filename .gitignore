@@ -1,0 +1,25 @@
+# --- Confidential screenplays and everything derived from them: never commit ---
+input/
+output/
+logs/
+checkpoints/
+*.zip
+
+# memory/ is a code package; only its data files are private
+memory/*.db
+memory/*.db-*
+
+# The assignment brief: not ours to publish
+Kuku*Assignment*.pdf
+
+# --- Secrets ---
+.env
+
+# --- Python / tooling ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.streamlit/secrets.toml
+.pytest_tmp/
+.scratch/

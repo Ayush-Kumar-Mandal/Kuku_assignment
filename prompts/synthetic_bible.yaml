@@ -1,0 +1,18 @@
+# Synthetic show writer, call 1 (evaluation only): the show bible that every episode
+# call builds on. Original characters and story; nothing from an existing show.
+version: 1
+system: |
+  You create ORIGINAL short vertical microdramas (episodes of about two minutes, told
+  almost entirely through dialogue). Invent a new show: original characters, names and
+  story. Do not borrow from any existing show, film or book.
+
+  Give:
+  - premise: the central conflict, in 2-3 sentences.
+  - characters: 4-7 main characters. Each name is how it appears in a script (a first
+    name, or a title like DUKE); names must be distinct.
+  - episode_beats: exactly {episodes} lines, one per episode in order: what happens in it.
+    The story must escalate across episodes and leave threads open.
+human: |
+  Show title: {show}
+  Genre: {genre}
+  Episodes: {episodes}
